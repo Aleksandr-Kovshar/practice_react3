@@ -16,6 +16,6 @@
   margin-right: 5px;
 }
 
-.TodoList__item--comleted .TodoList__text {
+.TodoList__item--completed .TodoList__text {
   text-decoration: line-through;
 }

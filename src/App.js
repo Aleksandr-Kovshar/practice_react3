@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import "./App.css";
 // import Counter from "./components/Counter";
-// import Dropdown from "./components/Dropdown";
+import Dropdown from "./components/Dropdown";
 import ColorPicker from "./components/ColorPicker";
 import TodoList from "./components/TodoList";
 import initialTodos from "./todos.json";
@@ -9,6 +9,12 @@ import Form from "./components/Form";
 import TodoEditor from "./components/TodoEditor";
 import Filter from "./components/Filter";
 import shortid from "shortid";
+import Modal from "./components/Modal";
+import Clock from "./components/Clock";
+import Tabs from "./components/Tabs";
+import tabs from "./tabs.json";
+import IconButton from "./components/IconButton";
+import { ReactComponent as AddIcon } from "./icons/add.svg";
 
 const ColorPickerOptons = [
   { label: "red", color: "#F44336" },
@@ -39,6 +45,39 @@ class App extends Component {
     filter: "",
     name: "",
     tag: "",
+    showModal: false,
+  };
+
+  componentDidMount(pervProps, prevState) {
+    const todos = localStorage.getItem("todos");
+    const parsedTodos = JSON.parse(todos);
+    console.log(todos);
+
+    if (parsedTodos) {
+      this.setState({ todos: parsedTodos });
+    }
+  }
+
+  componentDidUpdate(pervProps, prevState) {
+    const nextTodos = this.state.todos;
+    const prevTodos = prevState.todos;
+
+    if (nextTodos !== prevTodos) {
+      console.log(
+        "обновился todos, записываю в хранилице, сейчас это локал сторедж"
+      );
+      localStorage.setItem("todos", JSON.stringify(this.state.todos));
+    }
+
+    // if (nextTodos.length > prevTodos.length && prevTodos.length !== 0) {
+    //    this.toggleModal();
+    // }
+  }
+
+  toggleModal = () => {
+    this.setState((state) => ({
+      showModal: !state.showModal,
+    }));
   };
 
   addTodo = (text) => {
@@ -52,6 +91,8 @@ class App extends Component {
     this.setState((prevState) => ({
       todos: [todo, ...prevState.todos],
     }));
+
+    this.toggleModal();
   };
 
   deleteTodo = (todoId) => {
@@ -105,7 +146,7 @@ class App extends Component {
   };
 
   render() {
-    const { todos, filter } = this.state;
+    const { todos, filter, showModal } = this.state;
     const totalTodoCount = todos.length;
     const completedTodoCount = todos.reduce(
       (total, todo) => (todo.completed ? total + 1 : total),
@@ -121,12 +162,22 @@ class App extends Component {
 
     return (
       <div className="App">
-        <Form onSubmitProp={this.formSubmitHandler} />
+        <IconButton onClick={this.toggleModal} aria-label="Добавить todo">
+          <AddIcon width="40px" height="40px" fill="#fff" />
+        </IconButton>
+        {/* <Form onSubmitProp={this.formSubmitHandler} /> */}
         {/* <h1>Состояние компонента</h1> */}
         {/* <Counter initialValue={0} /> */}
-        <ColorPicker options={ColorPickerOptons} />
+        {/* <ColorPicker options={ColorPickerOptons} /> */}
         {/* <Dropdown /> */}
-        <TodoEditor onSubmitProp={this.addTodo} />
+        {/* <button type="button" onClick={this.toggleModal}>
+          Открыть модалку
+        </button> */}
+        {showModal && (
+          <Modal onClose={this.toggleModal}>
+            <TodoEditor onSubmitProp={this.addTodo} />
+          </Modal>
+        )}
 
         <Filter value={filter} onChange={this.changeFilter} />
 
@@ -140,6 +191,8 @@ class App extends Component {
           onDeleteTodo={this.deleteTodo}
           onToggleCompleted={this.toggleCompleted}
         />
+        {/* <Clock />
+        <Tabs items={tabs} /> */}
       </div>
     );
   }
